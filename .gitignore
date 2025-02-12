@@ -1,0 +1,12 @@
+/vcpkg_installed/
+/cmake-build-debug/
+/cmake-build-release/
+/.idea/
+/.vscode/
+/.vs/
+/CMakeFiles/
+/CMakeScripts/
+/CMakeCache.txt
+/CMakeCache.txt.lock
+/CMakeCache.txt/
+/.zed/
