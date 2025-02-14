@@ -1,8 +1,10 @@
 #include <iostream>
 
+#include "Core/SturdyEngine.h"
+
 using std::cout;
 
 
 int main() {
-    cout << "Runtime\n";
+    SFT::SturdyEngine engine;
 }

@@ -4,12 +4,8 @@
   "dependencies": [
     "glfw3",
     "glm",
-    {
-      "name": "vulkan-headers",
-      "version>=": "1.4.304.0"
-    },
-    "openal-soft",
-    "wgpu-native"
+    "vulkan",
+    "openal-soft"
   ],
   "builtin-baseline": "7839a2020f55999afc4f6b343e540c764916fdc1"
 }

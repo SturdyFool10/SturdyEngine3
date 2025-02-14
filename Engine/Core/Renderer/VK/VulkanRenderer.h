@@ -6,17 +6,16 @@
 #define VULKAN_H
 #include <complex>
 #include <expected>
-
+#include <vulkan/vulkan.h>
 #include "../Renderer.h"
 
-
 namespace SFT::Renderer::VK {
-    class Vulkan : public Renderer {
+    class VulkanRenderer : public Renderer {
         private:
-
+            bool m_isInitialized = false;
         public:
-            Vulkan();
-            ~Vulkan() override;
+            VulkanRenderer();
+            ~VulkanRenderer() override;
             std::expected<void, std::string> Initialize() override;
             void Shutdown() override;
             std::expected<void, std::string> RenderFrame() override;

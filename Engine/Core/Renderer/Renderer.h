@@ -7,9 +7,12 @@
 #include <complex>
 #include <expected>
 
+typedef std::expected<bool, std::string> (*UpdateCallback)(double deltaTime);
 
 namespace SFT::Renderer {
     class Renderer {
+        private:
+            UpdateCallback m_updateCallback;
         public:
             virtual ~Renderer() {};
             virtual std::expected<void, std::string> Initialize() = 0;
