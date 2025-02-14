@@ -1,11 +1,6 @@
 cmake_minimum_required(VERSION 3.30)
 project(SturdyEngine3 LANGUAGES CXX)
 
-set(SHARE_DIR F:/Projects/SturdyEngine3/vcpkg_installed/x64-windows-static/share)
-set(glfw3_DIR ${SHARE_DIR}/glfw3)
-set(glm_DIR ${SHARE_DIR}/glm)
-set(OpenAL_DIR ${SHARE_DIR}/openal-soft)
-
 
 set(CMAKE_CXX_STANDARD 26)
 # Application Specific Deps go here, this allows for easy linking of libraries, the Core and its deps are automatically linked, but you sure can add more here!
@@ -30,6 +25,7 @@ if(NOT DEFINED ENV{VULKAN_SDK})
     message(FATAL_ERROR "VULKAN_SDK environment variable is not set.")
 endif()
 set(VULKAN_SDK $ENV{VULKAN_SDK})
+string(REPLACE "\\" "/" VULKAN_SDK ${VULKAN_SDK})
 # Function to gather source files
 function(gather_source_files target_name target_dir)
     file(GLOB_RECURSE ${target_name}_SOURCE_FILES ${CMAKE_SOURCE_DIR}/${target_dir}/*.cpp ${CMAKE_SOURCE_DIR}/${target_dir}/*.h)

@@ -7,4 +7,5 @@ using std::cout;
 
 int main() {
     SFT::SturdyEngine engine;
+    engine.run();
 }

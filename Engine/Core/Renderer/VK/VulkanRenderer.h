@@ -6,13 +6,22 @@
 #define VULKAN_H
 #include <complex>
 #include <expected>
+#include <vector>
 #include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
 #include "../Renderer.h"
 
 namespace SFT::Renderer::VK {
     class VulkanRenderer : public Renderer {
         private:
             bool m_isInitialized = false;
+            VkInstance m_instance;
+
+
+
+            std::expected<int, std::string> create_instance();
+            bool checkValidationLayerSupport();
+
         public:
             VulkanRenderer();
             ~VulkanRenderer() override;

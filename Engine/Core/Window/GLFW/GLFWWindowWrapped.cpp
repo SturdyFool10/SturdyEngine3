@@ -17,7 +17,6 @@ namespace SFT {
     namespace Window {
         namespace GLFW {
             expected<void, string> GLFWWindowWrapped::Create(const int width, const int height, const string& title) {
-                assert(glfwInit() == GLFW_TRUE);
                 glfwSetErrorCallback(GLFWErrorPrinter);
                 glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
                 glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);

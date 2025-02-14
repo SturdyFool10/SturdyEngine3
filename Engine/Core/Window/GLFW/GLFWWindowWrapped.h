@@ -15,6 +15,7 @@
         #define GLFW_EXPOSE_NATIVE_X11
     #endif
 #endif
+#include <cassert>
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 #include "../Window.h"
@@ -26,7 +27,9 @@ namespace SFT {
                 private:
                     GLFWwindow* m_window;
                 public:
-                    virtual ~GLFWWindowWrapped() {};
+                    virtual ~GLFWWindowWrapped() {
+                        assert(glfwInit() == GLFW_TRUE);
+                    };
                     expected<void, string> Create(int width, int height, const string& title) override;
                     void Destroy() override;
                     void* GetNativeWindowHandle() override;

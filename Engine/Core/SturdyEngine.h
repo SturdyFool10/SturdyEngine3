@@ -19,6 +19,7 @@ namespace SFT {
         public:
         SturdyEngine();
         ~SturdyEngine();
+        void run();
     };
 } // SFT
 
