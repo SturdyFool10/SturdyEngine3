@@ -16,19 +16,23 @@ namespace SFT::Renderer::VK {
         private:
             bool m_isInitialized = false;
             VkInstance m_instance;
-
-
+            VkDebugUtilsMessengerEXT m_debugMessenger;
 
             std::expected<int, std::string> create_instance();
-            bool checkValidationLayerSupport();
+            static bool checkValidationLayerSupport();
+            auto setupDebugMessenger() -> std::expected<void, std::string>;
 
         public:
             VulkanRenderer();
             ~VulkanRenderer() override;
             std::expected<void, std::string> Initialize() override;
+            std::vector<const char*> getRequiredExtensions();
             void Shutdown() override;
             std::expected<void, std::string> RenderFrame() override;
             std::expected<void, std::string> Resize(int width, int height) override;
+            static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                                          VkDebugUtilsMessageTypeFlagsEXT messageType,
+                                          const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
     };
 } // VK
 
