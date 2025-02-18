@@ -35,6 +35,7 @@ namespace SFT {
                     void* GetNativeWindowHandle() override;
                     void ProcessEvents() override;
                     bool should_close() override;
+                    void setBgBlur(bool blur) override;
             };
         } // GLFW
     } // Window

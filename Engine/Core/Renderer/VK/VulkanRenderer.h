@@ -9,30 +9,52 @@
 #include <vector>
 #include <vulkan/vulkan.h>
 #include <GLFW/glfw3.h>
+#include <iostream>
+#include <map>
 #include "../Renderer.h"
+
+using std::expected;
+using std::unexpected;
+using std::string;
+using std::vector;
+using std::multimap;
+using std::map;
+using std::cout;
+using std::cerr;
 
 namespace SFT::Renderer::VK {
     class VulkanRenderer : public Renderer {
         private:
+#pragma region Private Member Variables
             bool m_isInitialized = false;
             VkInstance m_instance;
             VkDebugUtilsMessengerEXT m_debugMessenger;
+            VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+#pragma endregion
 
-            std::expected<int, std::string> create_instance();
-            static bool checkValidationLayerSupport();
-            auto setupDebugMessenger() -> std::expected<void, std::string>;
+
+
+#pragma region Internal Functions
+            expected<void, string> create_instance();
+            static auto checkValidationLayerSupport() -> bool;
+            auto setupDebugMessenger() -> expected<void, string>;
+            auto pickPhysicalDevice() -> expected<void, string>;
+            auto getRequiredExtensions() -> vector<const char*>;
+#pragma endregion
 
         public:
             VulkanRenderer();
             ~VulkanRenderer() override;
-            std::expected<void, std::string> Initialize() override;
-            std::vector<const char*> getRequiredExtensions();
+            auto Initialize() -> expected<void, string> override;
             void Shutdown() override;
-            std::expected<void, std::string> RenderFrame() override;
-            std::expected<void, std::string> Resize(int width, int height) override;
-            static VkBool32 debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                          VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                          const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData);
+            auto RenderFrame() -> expected<void, string> override;
+            auto Resize(int width, int height) -> expected<void, string> override;
+            static auto debugCallback(
+                VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+                VkDebugUtilsMessageTypeFlagsEXT messageType,
+                const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+                void* pUserData
+            ) -> VkBool32;
     };
 } // VK
 

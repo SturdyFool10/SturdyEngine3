@@ -11,7 +11,7 @@ do some of the things that the Vulkan, WebGPU, or DirectX renderers can do
 
 - No support for ray tracing
 - No support for mesh shaders
-- No support for Multithreading
+- No support for Multithreading(beyond just a render thread)
 - No support for async compute
 - No support for async transfer
 
@@ -22,3 +22,8 @@ OpenGL is inherently single threaded, this means that whereas a modern PC has so
 
 ## In short
 OpenGL is a last resort, it's not good, it's not efficient, it's not fast, it's not modern, it's not good for anything other than running on old hardware, and even then it's not good for that either. If you can, use Vulkan, WebGPU or DX12, if you can't, use OpenGL, if you can't use OpenGL, you're out of luck, this renderer is the final fallback, and its not going to have the features of the more modern renderers
+
+
+# PS
+I know that some vendors have OpenGL extensions that allow for some of the features that I've said aren't supported, but I do not want any renderer to be vendor specific, this means that while I could implement mesh shaders on nvidia cards only, I just won't, I do not want my engine to give an unfair advantage to any vendor over another, this would mean that a theoretical game would only run on one vendor, and that sucks, so I'm making it impossible for that to be a thing
+#### renderers for a specific API will only use the features that are available on all vendors, this will be also decided on a case-by case basis for unique new gpu features, I do not want games that only work on one gpu vendor, that's not fair to the consumer

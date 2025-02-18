@@ -51,6 +51,16 @@ namespace SFT {
             bool GLFWWindowWrapped::should_close() {
                 return glfwWindowShouldClose(this->m_window);
             }
+
+            void GLFWWindowWrapped::setBgBlur(bool blur)
+            {
+                if (blur) {
+                    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
+                }
+                else {
+                    glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
+                }
+            }
         } // GLFW
     } // Window
 } // SFT

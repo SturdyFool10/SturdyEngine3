@@ -29,13 +29,13 @@ namespace SFT {
         glfwInit();
         this->window = new Window::GLFW::GLFWWindowWrapped();
         auto result = this->window->Create(800, 600, "deez nuts");
-        auto has_value = result.has_value();
-        if (!has_value) {
+        if (!result.has_value()) {
             throw std::runtime_error("Failed to initialize window: " + result.error());
         }
+        this->window->setBgBlur(true);
 
         this->renderer = new Renderer::VK::VulkanRenderer();
-        if (auto result = this->renderer->Initialize(); !result.has_value()) {
+        if (result = this->renderer->Initialize(); !result.has_value()) {
             throw std::runtime_error("Failed to initialize renderer: " + result.error());
         }
         this->main_loop();

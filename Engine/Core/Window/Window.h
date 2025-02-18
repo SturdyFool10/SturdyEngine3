@@ -21,6 +21,7 @@ namespace SFT::Window {
             virtual void* GetNativeWindowHandle() = 0;
             virtual void ProcessEvents() = 0;
             virtual bool should_close() = 0;
+            virtual void setBgBlur(bool blur) = 0;
     };
 } // Window
 
