@@ -51,6 +51,10 @@ endfunction()
         set(LIB_SEARCH_DIRS ${CMAKE_SOURCE_DIR}/vcpkg_installed/x64-linux/lib ${VULKAN_SDK}/lib)
     endif()
 
+
+foreach(INCLUDE_DIR ${INCLUDE_DIRS})
+    message(STATUS "Include directory: ${INCLUDE_DIR}")
+endforeach ()
 # Function to link libraries automatically
 function(link_libraries_automatically target_name)
     foreach(lib_file ${CORE_LIB_FILES})

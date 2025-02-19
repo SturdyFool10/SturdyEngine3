@@ -4,6 +4,8 @@
 
 #include "VulkanRenderer.h"
 
+#include <string.h>
+
 const std::vector validationLayers = {
     "VK_LAYER_KHRONOS_validation"
 };
