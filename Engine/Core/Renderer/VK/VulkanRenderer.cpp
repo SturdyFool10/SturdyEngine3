@@ -7,21 +7,22 @@
 #include <string.h>
 
 const std::vector validationLayers = {
-    "VK_LAYER_KHRONOS_validation"
-};
+        "VK_LAYER_KHRONOS_validation"
+    };
 
 #ifdef NDEBUG
     constexpr bool enableValidationLayers = false;
     #define debug if(false) std::cout
 #else
-    constexpr bool enableValidationLayers = true;
-    #define debug std::cout
+constexpr bool enableValidationLayers = true;
+#define debug std::cout
 #endif
 
 namespace SFT::Renderer::VK {
 
 #pragma region additional functions
-    void DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) {
+    auto DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
+                                       const VkAllocationCallbacks* pAllocator) -> void {
         auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
             vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
         if (func != nullptr) {
@@ -29,25 +30,93 @@ namespace SFT::Renderer::VK {
         }
     }
 
-    VkResult CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) {
-        if (auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(instance, "vkCreateDebugUtilsMessengerEXT")); func != nullptr) {
+    auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
+                                      const VkAllocationCallbacks* pAllocator,
+                                      VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult {
+        if (auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(
+            instance, "vkCreateDebugUtilsMessengerEXT")); func != nullptr)
+        {
             return func(instance, pCreateInfo, pAllocator, pDebugMessenger);
-        } else {
+        }
+        else
+        {
             return VK_ERROR_EXTENSION_NOT_PRESENT;
         }
     }
 
-    void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) {
+    auto populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo) -> void {
         createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
-        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
+        createInfo.messageSeverity = VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT;
+        createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT |
+            VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = VulkanRenderer::debugCallback;
+    }
+
+    auto rate_device_suitability(const VkPhysicalDevice& device) -> double {
+        map<string, double> type_multipliers = {
+                {"discrete", 1},
+                {"integrated", 0.75},
+                {"virtual", 0.5},
+                {"cpu", 0.25},
+            };
+        map<string, double> feature_multipliers = {
+                {"geometryShader", 1.3},
+                {"tessellationShader", 1.2},
+                {"multiViewport", 1.1},
+                {"samplerAnisotropy", 1.2},
+                {"textureCompressionBC", 1.1},
+                {"fillModeNonSolid", 1.05},
+                {"wideLines", 1.05}
+            };
+
+        VkPhysicalDeviceProperties deviceProperties;
+        vkGetPhysicalDeviceProperties(device, &deviceProperties);
+        VkPhysicalDeviceFeatures deviceFeatures;
+        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
+
+        double score = 30.;
+
+        // Apply feature multipliers
+        if (deviceFeatures.geometryShader)
+            score *= feature_multipliers["geometryShader"];
+        if (deviceFeatures.tessellationShader)
+            score *= feature_multipliers["tessellationShader"];
+        if (deviceFeatures.multiViewport)
+            score *= feature_multipliers["multiViewport"];
+        if (deviceFeatures.samplerAnisotropy)
+            score *= feature_multipliers["samplerAnisotropy"];
+        if (deviceFeatures.textureCompressionBC)
+            score *= feature_multipliers["textureCompressionBC"];
+        if (deviceFeatures.fillModeNonSolid)
+            score *= feature_multipliers["fillModeNonSolid"];
+        if (deviceFeatures.wideLines)
+            score *= feature_multipliers["wideLines"];
+
+        // Apply device type multiplier
+        switch (deviceProperties.deviceType) {
+        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
+            score *= type_multipliers["discrete"];
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
+            score *= type_multipliers["integrated"];
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
+            score *= type_multipliers["virtual"];
+            break;
+        case VK_PHYSICAL_DEVICE_TYPE_CPU:
+            score *= type_multipliers["cpu"];
+            break;
+        default:
+            score *= 0; // Unknown device type
+        }
+        debug << "Device: " << deviceProperties.deviceName << " Score: " << score << "\n";
+        return score;
     }
 #pragma endregion
 
-
-
+#pragma region VulkanRenderer Functions
     auto VulkanRenderer::create_instance() -> expected<void, string> {
         if (enableValidationLayers && !checkValidationLayerSupport()) {
             // ReSharper disable once CppDFAUnreachableCode
@@ -71,7 +140,7 @@ namespace SFT::Renderer::VK {
         vector<const char*> requiredExtensions;
 
         requiredExtensions.reserve(extensionCount);
-        for(uint32_t i = 0; i < extensionCount; i++) {
+        for (uint32_t i = 0; i < extensionCount; i++) {
             requiredExtensions.emplace_back(extensions[i]);
         }
 
@@ -138,7 +207,8 @@ namespace SFT::Renderer::VK {
     }
 
     auto VulkanRenderer::setupDebugMessenger() -> expected<void, string> {
-        if (!enableValidationLayers) return {};
+        if (!enableValidationLayers)
+            return {};
 
         VkDebugUtilsMessengerCreateInfoEXT createInfo;
         populateDebugMessengerCreateInfo(createInfo);
@@ -151,85 +221,41 @@ namespace SFT::Renderer::VK {
 
     //physical devices and queue families lesson
 
-    auto is_device_compatible(VkPhysicalDevice device) -> bool
-    {
+    auto VulkanRenderer::is_device_compatible(const VkPhysicalDevice device) -> bool {
         VkPhysicalDeviceProperties deviceProperties;
         vkGetPhysicalDeviceProperties(device, &deviceProperties);
         VkPhysicalDeviceFeatures deviceFeatures;
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-        return deviceFeatures.geometryShader;
+        QueueFamilyIndices indices = this->findQueueFamilies(device);
+
+
+        return deviceFeatures.geometryShader and indices.isComplete();
     }
 
-    auto rate_device_suitability(const VkPhysicalDevice& device) -> int {
-        map<string, double> type_multipliers = {
-            {"discrete", 1},
-            {"integrated", 0.75},
-            {"virtual", 0.5},
-            {"cpu", 0.25},
-        };
-        map<string, double> feature_multipliers = {
-            {"geometryShader", 1.3},
-            {"tessellationShader", 1.2},
-            {"multiViewport", 1.1},
-            {"samplerAnisotropy", 1.2},
-            {"textureCompressionBC", 1.1},
-            {"fillModeNonSolid", 1.05},
-            {"wideLines", 1.05}
-        };
-
-        VkPhysicalDeviceProperties deviceProperties;
-        vkGetPhysicalDeviceProperties(device, &deviceProperties);
-        VkPhysicalDeviceFeatures deviceFeatures;
-        vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
-
-        double score = 30;
-
-        // Apply feature multipliers
-        if (deviceFeatures.geometryShader) score *= feature_multipliers["geometryShader"];
-        if (deviceFeatures.tessellationShader) score *= feature_multipliers["tessellationShader"];
-        if (deviceFeatures.multiViewport) score *= feature_multipliers["multiViewport"];
-        if (deviceFeatures.samplerAnisotropy) score *= feature_multipliers["samplerAnisotropy"];
-        if (deviceFeatures.textureCompressionBC) score *= feature_multipliers["textureCompressionBC"];
-        if (deviceFeatures.fillModeNonSolid) score *= feature_multipliers["fillModeNonSolid"];
-        if (deviceFeatures.wideLines) score *= feature_multipliers["wideLines"];
-
-        // Apply device type multiplier
-        switch (deviceProperties.deviceType) {
-        case VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU:
-            score *= type_multipliers["discrete"];
-            break;
-        case VK_PHYSICAL_DEVICE_TYPE_INTEGRATED_GPU:
-            score *= type_multipliers["integrated"];
-            break;
-        case VK_PHYSICAL_DEVICE_TYPE_VIRTUAL_GPU:
-            score *= type_multipliers["virtual"];
-            break;
-        case VK_PHYSICAL_DEVICE_TYPE_CPU:
-            score *= type_multipliers["cpu"];
-            break;
-        default:
-            score *= 0; // Unknown device type
-        }
-        debug << "Device: " << deviceProperties.deviceName << " Score: " << score << "\n";
-        return round(score);
-    }
+    //RateDeviceSuitability moved to additional functions
 
     auto VulkanRenderer::pickPhysicalDevice() -> expected<void, string> {
         //enumerate physical devices to get count
         uint32_t deviceCount = 0;
         vkEnumeratePhysicalDevices(this->m_instance, &deviceCount, nullptr);
         if (deviceCount == 0) {
-            return unexpected("failed to find GPUs with Vulkan support!"); //we obviously can't draw on a system that doesn't support Vulkan
+            return unexpected("failed to find GPUs with Vulkan support!");
+            //we obviously can't draw on a system that doesn't support Vulkan
         }
         //we can now pre-alloc a vector to store the devices
         vector<VkPhysicalDevice> devices(deviceCount);
         vkEnumeratePhysicalDevices(this->m_instance, &deviceCount, devices.data()); //once more for the data
         //create an ordered map to store the devices and their scores, this also sorts them
-        multimap<int, VkPhysicalDevice> candidates;
+        multimap<double, VkPhysicalDevice> candidates;
 
-        for (const auto& device: devices) {
-            int score = rate_device_suitability(device);
-            candidates.insert(std::make_pair(score, device)); //rate each, then store them in the map as a score to device pair
+        for (const auto& device : devices) {
+            double score = rate_device_suitability(device);
+            if (this->is_device_compatible(device)) {
+                candidates.insert(std::make_pair(score, device));
+            } else {
+                cout << "Device: " << device << " is not compatible, and won't be considered further\n";
+            }
+            //rate each, then store them in the map as a score to device pair
         }
         if (candidates.rbegin()->first > 0) {
             this->m_physicalDevice = candidates.rbegin()->second;
@@ -241,6 +267,31 @@ namespace SFT::Renderer::VK {
         }
         return {};
     }
+
+    auto VulkanRenderer::findQueueFamilies(VkPhysicalDevice device)-> QueueFamilyIndices {
+        QueueFamilyIndices indices;
+        // Logic to find queue family indices to populate struct with
+        uint32_t queueFamilyCount = 0;
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+        std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+        vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+        int i = 0;
+        for (const auto& queueFamily : queueFamilies) {
+            if (indices.isComplete()) {
+                break;
+            }
+            if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+                indices.graphicsFamily = i;
+            }
+
+            i++;
+        }
+
+        return indices;
+    }
+
 
 
     VulkanRenderer::VulkanRenderer() {
@@ -290,14 +341,18 @@ namespace SFT::Renderer::VK {
         return {};
     }
 
-    VKAPI_ATTR auto VKAPI_CALL VulkanRenderer::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
-                                                             VkDebugUtilsMessageTypeFlagsEXT messageType,
-                                                             const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-                                                             void* pUserData) -> VkBool32 {
+    VKAPI_ATTR auto VKAPI_CALL VulkanRenderer::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) -> VkBool32 {
         if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
             cerr << "validation layer: " << pCallbackData->pMessage << "\n";
         }
 
         return VK_FALSE;
     }
+#pragma endregion
+
+#pragma region QueueFamilyIndices Functions
+    auto QueueFamilyIndices::isComplete() -> bool {
+        return graphicsFamily.has_value();
+    }
+#pragma endregion
 }

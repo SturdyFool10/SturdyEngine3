@@ -11,10 +11,12 @@
 #include <GLFW/glfw3.h>
 #include <iostream>
 #include <map>
+#include <optional>
 #include "../Renderer.h"
 
 using std::expected;
 using std::unexpected;
+using std::optional;
 using std::string;
 using std::vector;
 using std::multimap;
@@ -23,6 +25,9 @@ using std::cout;
 using std::cerr;
 
 namespace SFT::Renderer::VK {
+
+    struct QueueFamilyIndices;
+
     class VulkanRenderer : public Renderer {
         private:
 #pragma region Private Member Variables
@@ -37,8 +42,9 @@ namespace SFT::Renderer::VK {
 #pragma region Internal Functions
             expected<void, string> create_instance();
             static auto checkValidationLayerSupport() -> bool;
-            auto setupDebugMessenger() -> expected<void, string>;
+            auto setupDebugMessenger() -> expected<void, string>;auto is_device_compatible(VkPhysicalDevice device)->bool;
             auto pickPhysicalDevice() -> expected<void, string>;
+            auto findQueueFamilies(VkPhysicalDevice device)->QueueFamilyIndices;
             auto getRequiredExtensions() -> vector<const char*>;
 #pragma endregion
 
@@ -55,6 +61,11 @@ namespace SFT::Renderer::VK {
                 const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
                 void* pUserData
             ) -> VkBool32;
+    };
+    struct QueueFamilyIndices {
+        optional<uint32_t> graphicsFamily;
+
+        auto isComplete() -> bool;
     };
 } // VK
 

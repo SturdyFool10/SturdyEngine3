@@ -12,8 +12,7 @@ furnished to do so, subject to the following conditions:
 1. If the Software is used to create a derivative engine, the resulting engine
    must be open-sourced under the same license as this Software.
 
-2. Games or other software created using the Software are not required to be
-   open-sourced, but must include the following credit in a visible location
+2. Games or other software(not including other engines) created using the Software are not required to be open-sourced, but must include the following credit in a visible location
    within the software and any accompanying documentation(eg. the credits): "Powered by SturdyEngine3, created by SturdyFool10".
 
 3. Unless permitted you shall not claim to own SturdyEngine3 or any part of it, or to have any special relationship with SturdyFool10. your software is powered by Sturdyfool10's, nothing more, nothing less.
