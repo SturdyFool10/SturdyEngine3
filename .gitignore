@@ -10,3 +10,6 @@
 /CMakeCache.txt.lock
 /CMakeCache.txt/
 /.zed/
+/build
+/build_vs2022
+/build_make
