@@ -4,6 +4,7 @@
 
 #ifndef VULKAN_H
 #define VULKAN_H
+
 #include <complex>
 #include <expected>
 #include <vector>
@@ -12,12 +13,14 @@
 #include <iostream>
 #include <map>
 #include <optional>
+#include <set>
 #include "../Renderer.h"
 
 using std::expected;
 using std::unexpected;
 using std::optional;
 using std::string;
+using std::set;
 using std::vector;
 using std::multimap;
 using std::map;
@@ -35,16 +38,19 @@ namespace SFT::Renderer::VK {
             VkInstance m_instance;
             VkDebugUtilsMessengerEXT m_debugMessenger;
             VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
+            VkDevice m_logicalDevice;
+            VkQueue m_graphicsQueue;
 #pragma endregion
 
 
 
 #pragma region Internal Functions
-            expected<void, string> create_instance();
+            auto create_instance()-> expected<void, string>;
             static auto checkValidationLayerSupport() -> bool;
             auto setupDebugMessenger() -> expected<void, string>;auto is_device_compatible(VkPhysicalDevice device)->bool;
             auto pickPhysicalDevice() -> expected<void, string>;
             auto findQueueFamilies(VkPhysicalDevice device)->QueueFamilyIndices;
+            auto createLogicalDevice()->expected<void, string>;
             auto getRequiredExtensions() -> vector<const char*>;
 #pragma endregion
 

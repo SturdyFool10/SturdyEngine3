@@ -21,8 +21,7 @@ constexpr bool enableValidationLayers = true;
 namespace SFT::Renderer::VK {
 
 #pragma region additional functions
-    auto DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger,
-                                       const VkAllocationCallbacks* pAllocator) -> void {
+    auto DestroyDebugUtilsMessengerEXT(VkInstance instance, VkDebugUtilsMessengerEXT debugMessenger, const VkAllocationCallbacks* pAllocator) -> void {
         auto func = reinterpret_cast<PFN_vkDestroyDebugUtilsMessengerEXT>(
             vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT"));
         if (func != nullptr) {
@@ -30,9 +29,7 @@ namespace SFT::Renderer::VK {
         }
     }
 
-    auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
-                                      const VkAllocationCallbacks* pAllocator,
-                                      VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult {
+    auto CreateDebugUtilsMessengerEXT(VkInstance instance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger) -> VkResult {
         if (auto func = reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(vkGetInstanceProcAddr(
             instance, "vkCreateDebugUtilsMessengerEXT")); func != nullptr)
         {
@@ -111,7 +108,7 @@ namespace SFT::Renderer::VK {
         default:
             score *= 0; // Unknown device type
         }
-        debug << "Device: " << deviceProperties.deviceName << " Score: " << score << "\n";
+        debug << "Device: \"" << deviceProperties.deviceName << "\", Score: " << score << "\n";
         return score;
     }
 #pragma endregion
@@ -227,8 +224,6 @@ namespace SFT::Renderer::VK {
         VkPhysicalDeviceFeatures deviceFeatures;
         vkGetPhysicalDeviceFeatures(device, &deviceFeatures);
         QueueFamilyIndices indices = this->findQueueFamilies(device);
-
-
         return deviceFeatures.geometryShader and indices.isComplete();
     }
 
@@ -268,7 +263,7 @@ namespace SFT::Renderer::VK {
         return {};
     }
 
-    auto VulkanRenderer::findQueueFamilies(VkPhysicalDevice device)-> QueueFamilyIndices {
+    auto VulkanRenderer::findQueueFamilies(VkPhysicalDevice device) -> QueueFamilyIndices {
         QueueFamilyIndices indices;
         // Logic to find queue family indices to populate struct with
         uint32_t queueFamilyCount = 0;
@@ -292,7 +287,42 @@ namespace SFT::Renderer::VK {
         return indices;
     }
 
+    //Logical Device and Queues lesson
 
+    auto VulkanRenderer::createLogicalDevice() -> expected<void, string> {
+        QueueFamilyIndices indices = findQueueFamilies(this->m_physicalDevice);
+
+        VkDeviceQueueCreateInfo queueCreateInfo{};
+        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
+        queueCreateInfo.queueCount = 1;
+        float queuePriority = 1.0f;
+        queueCreateInfo.pQueuePriorities = &queuePriority;
+
+        VkPhysicalDeviceFeatures deviceFeatures{};
+
+        VkDeviceCreateInfo createInfo{};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+
+        createInfo.pQueueCreateInfos = &queueCreateInfo;
+        createInfo.queueCreateInfoCount = 1;
+
+        createInfo.pEnabledFeatures = &deviceFeatures;
+
+        createInfo.enabledExtensionCount = 0;
+
+        if (enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
+            createInfo.ppEnabledLayerNames = validationLayers.data();
+        } else {
+            createInfo.enabledLayerCount = 0;
+        }
+        if (vkCreateDevice(this->m_physicalDevice, &createInfo, nullptr, &this->m_logicalDevice) != VK_SUCCESS) {
+            return unexpected("failed to create logical device!");
+        }
+        vkGetDeviceQueue(this->m_logicalDevice, indices.graphicsFamily.value(), 0, &this->m_graphicsQueue);
+        return {};
+    }
 
     VulkanRenderer::VulkanRenderer() {
 
@@ -313,6 +343,9 @@ namespace SFT::Renderer::VK {
         if (result = this->pickPhysicalDevice(); !result.has_value()) {
             return unexpected("Failed to pick physical device: " + result.error());
         }
+        if (result = this->createLogicalDevice(); !result.has_value()) {
+            return unexpected("Failed to create logical device: " + result.error());
+        }
         return {};
     }
 
@@ -327,6 +360,7 @@ namespace SFT::Renderer::VK {
     }
 
     void VulkanRenderer::Shutdown() {
+        vkDestroyDevice(this->m_logicalDevice, nullptr);
         if (enableValidationLayers) {
             DestroyDebugUtilsMessengerEXT(this->m_instance, this->m_debugMessenger, nullptr);
         }
