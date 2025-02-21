@@ -14,6 +14,8 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <string>
+#include "Core/Window/Window.h"
 #include "../Renderer.h"
 
 using std::expected;
@@ -30,7 +32,7 @@ using std::cerr;
 namespace SFT::Renderer::VK {
 
     struct QueueFamilyIndices;
-
+    struct SwapChainSupportDetails;
     class VulkanRenderer : public Renderer {
         private:
 #pragma region Private Member Variables
@@ -43,12 +45,16 @@ namespace SFT::Renderer::VK {
             VkSurfaceKHR m_surface;
             Window::Window* m_window;
             VkQueue m_presentQueue;
+            VkSwapchainKHR m_swapChain;
+            vector<VkImage> m_swapChainImages;
+            VkFormat swapChainImageFormat;
+            VkExtent2D swapChainExtent;
 #pragma endregion
 
 
 
 #pragma region Internal Functions
-            auto create_instance()-> expected<void, string>;
+            auto create_instance() -> expected<void, string>;
             static auto checkValidationLayerSupport() -> bool;
             auto setupDebugMessenger() -> expected<void, string>;
             auto is_device_compatible(VkPhysicalDevice device)->bool;
@@ -56,6 +62,12 @@ namespace SFT::Renderer::VK {
             auto findQueueFamilies(VkPhysicalDevice device) -> QueueFamilyIndices;
             auto createLogicalDevice() -> expected<void, string>;
             auto createSurface() -> expected<void, string>;
+            auto checkDeviceExtensionSupport(VkPhysicalDevice device) -> bool;
+            auto querySwapChainSupport(VkPhysicalDevice device) -> SwapChainSupportDetails;
+            auto chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>&availableFormats) -> VkSurfaceFormatKHR;
+            auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>&availablePresentModes) -> VkPresentModeKHR;
+            auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR&capabilities) -> VkExtent2D;
+            auto createSwapChain() -> expected<void, string>;
             auto getRequiredExtensions() -> vector<const char*>;
 #pragma endregion
 
@@ -80,6 +92,13 @@ namespace SFT::Renderer::VK {
 
         auto isComplete() -> bool;
     };
+
+    struct SwapChainSupportDetails {
+        VkSurfaceCapabilitiesKHR capabilities;
+        std::vector<VkSurfaceFormatKHR> formats;
+        std::vector<VkPresentModeKHR> presentModes;
+    };
+
 } // VK
 
 #endif //VULKAN_H

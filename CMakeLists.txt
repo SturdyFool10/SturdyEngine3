@@ -1,6 +1,20 @@
 cmake_minimum_required(VERSION 3.30)
 project(SturdyEngine3 LANGUAGES CXX)
 
+# Use the static runtime (/MT)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded")
+
+# Specify the static triplet for vcpkg
+set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "")
+
+if(DEFINED ENV{VCPKG_ROOT})
+    set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake" CACHE STRING "")
+else()
+    message(FATAL_ERROR "VCPKG_ROOT environment variable is not set.")
+endif()
+
+# Force fmt to be header\-only to avoid duplicate symbol definitions
+add_compile_definitions(FMT_HEADER_ONLY)
 
 set(CMAKE_CXX_STANDARD 26)
 # Application Specific Deps go here, this allows for easy linking of libraries, the Core and its deps are automatically linked, but you sure can add more here!

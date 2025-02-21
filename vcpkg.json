@@ -25,6 +25,12 @@
   }, {
     "name" : "glfw3",
     "version>=" : "3.4#1"
+  }, {
+    "name" : "spdlog",
+    "version>=" : "1.15.1"
+  }, {
+    "name" : "fmt",
+    "version>=" : "11.0.2#1"
   } ],
   "builtin-baseline" : "7839a2020f55999afc4f6b343e540c764916fdc1"
 }

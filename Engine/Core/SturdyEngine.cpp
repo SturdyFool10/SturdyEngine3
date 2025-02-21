@@ -1,6 +1,6 @@
 
 #include "SturdyEngine.h"
-
+#include "spdlog/spdlog.h"
 #include "Renderer/VK/VulkanRenderer.h"
 #include "Window/GLFW/GLFWWindowWrapped.h"
 
@@ -27,6 +27,12 @@ namespace SFT {
 
     void SturdyEngine::run() {
         glfwInit();
+        #ifdef NDEBUG
+            spdlog::set_level(spdlog::level::info);
+        #else
+            spdlog::set_level(spdlog::level::trace);
+        #endif
+        spdlog::set_pattern("%^[%l]%$: %v");
         this->window = new Window::GLFW::GLFWWindowWrapped();
         auto result = this->window->Create(800, 600, "deez nuts");
         if (!result.has_value()) {
