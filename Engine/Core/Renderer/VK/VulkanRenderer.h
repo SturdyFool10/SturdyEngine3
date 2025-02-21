@@ -42,6 +42,7 @@ namespace SFT::Renderer::VK {
             VkQueue m_graphicsQueue;
             VkSurfaceKHR m_surface;
             Window::Window* m_window;
+            VkQueue m_presentQueue;
 #pragma endregion
 
 
@@ -75,6 +76,7 @@ namespace SFT::Renderer::VK {
     };
     struct QueueFamilyIndices {
         optional<uint32_t> graphicsFamily;
+        optional<uint32_t> presentFamily;
 
         auto isComplete() -> bool;
     };

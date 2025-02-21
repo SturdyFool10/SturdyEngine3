@@ -274,6 +274,8 @@ namespace SFT::Renderer::VK {
         std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
 
+
+
         int i = 0;
         for (const auto& queueFamily : queueFamilies) {
             if (indices.isComplete()) {
@@ -281,6 +283,12 @@ namespace SFT::Renderer::VK {
             }
             if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
                 indices.graphicsFamily = i;
+            }
+
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, this->m_surface, &presentSupport);
+            if (presentSupport) {
+                indices.presentFamily = i;
             }
 
             i++;
@@ -294,20 +302,26 @@ namespace SFT::Renderer::VK {
     auto VulkanRenderer::createLogicalDevice() -> expected<void, string> {
         QueueFamilyIndices indices = findQueueFamilies(this->m_physicalDevice);
 
-        VkDeviceQueueCreateInfo queueCreateInfo{};
-        queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        queueCreateInfo.queueFamilyIndex = indices.graphicsFamily.value();
-        queueCreateInfo.queueCount = 1;
+        vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+        set<uint32_t> uniqueQueueFamilies = {indices.graphicsFamily.value(), indices.presentFamily.value()};
+
         float queuePriority = 1.0f;
-        queueCreateInfo.pQueuePriorities = &queuePriority;
+        for (uint32_t queueFamily : uniqueQueueFamilies) {
+            VkDeviceQueueCreateInfo queueCreateInfo{};
+            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueCreateInfo.queueFamilyIndex = queueFamily;
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfos.push_back(queueCreateInfo);
+        }
 
         VkPhysicalDeviceFeatures deviceFeatures{};
 
         VkDeviceCreateInfo createInfo{};
         createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 
-        createInfo.pQueueCreateInfos = &queueCreateInfo;
-        createInfo.queueCreateInfoCount = 1;
+        createInfo.queueCreateInfoCount = static_cast<uint32_t>(queueCreateInfos.size());
+        createInfo.pQueueCreateInfos = queueCreateInfos.data();
 
         createInfo.pEnabledFeatures = &deviceFeatures;
 
@@ -323,6 +337,7 @@ namespace SFT::Renderer::VK {
             return unexpected("failed to create logical device!");
         }
         vkGetDeviceQueue(this->m_logicalDevice, indices.graphicsFamily.value(), 0, &this->m_graphicsQueue);
+        vkGetDeviceQueue(this->m_logicalDevice, indices.presentFamily.value(), 0, &this->m_presentQueue);
         return {};
     }
 
@@ -403,14 +418,13 @@ namespace SFT::Renderer::VK {
         if (messageSeverity >= VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
             cerr << "validation layer: " << pCallbackData->pMessage << "\n";
         }
-
         return VK_FALSE;
     }
 #pragma endregion
 
 #pragma region QueueFamilyIndices Functions
     auto QueueFamilyIndices::isComplete() -> bool {
-        return graphicsFamily.has_value();
+        return graphicsFamily.has_value() and presentFamily.has_value();
     }
 #pragma endregion
 }
