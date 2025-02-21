@@ -27,15 +27,17 @@ namespace SFT {
                 private:
                     GLFWwindow* m_window;
                 public:
-                    virtual ~GLFWWindowWrapped() {
+                    ~GLFWWindowWrapped() override {
                         assert(glfwInit() == GLFW_TRUE);
                     };
-                    expected<void, string> Create(int width, int height, const string& title) override;
-                    void Destroy() override;
-                    void* GetNativeWindowHandle() override;
-                    void ProcessEvents() override;
-                    bool should_close() override;
-                    void setBgBlur(bool blur) override;
+                    auto Create(int width, int height, const string& title) -> expected<void, string> override;
+                    auto Destroy() -> void override;
+                    auto GetNativeWindowHandle() -> void* override;
+                    auto ProcessEvents() -> void override;
+                    auto should_close() -> bool override;
+                    auto setBgBlur(bool blur) -> void override;
+                    auto getAPIName() -> string override;
+                    auto get_handle() -> GLFWwindow*;
             };
         } // GLFW
     } // Window

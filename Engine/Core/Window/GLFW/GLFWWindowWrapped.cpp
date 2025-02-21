@@ -16,7 +16,7 @@ void GLFWErrorPrinter(int error, const char* description) {
 namespace SFT {
     namespace Window {
         namespace GLFW {
-            expected<void, string> GLFWWindowWrapped::Create(const int width, const int height, const string& title) {
+            auto GLFWWindowWrapped::Create(const int width, const int height, const string& title) -> expected<void, string> {
                 glfwSetErrorCallback(GLFWErrorPrinter);
                 glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
                 glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
@@ -27,12 +27,12 @@ namespace SFT {
                 return {};
             }
 
-            void GLFWWindowWrapped::Destroy() {
+            auto GLFWWindowWrapped::Destroy() -> void {
                 glfwDestroyWindow(this->m_window);
                 glfwTerminate();
             }
 
-            void* GLFWWindowWrapped::GetNativeWindowHandle() {
+            auto GLFWWindowWrapped::GetNativeWindowHandle() -> void*  {
                 #ifdef _WIN32
                     return glfwGetWin32Window(this->m_window);
                 #elif defined(__APPLE__)
@@ -45,21 +45,26 @@ namespace SFT {
                     #endif
                 #endif
             }
-            void GLFWWindowWrapped::ProcessEvents() {
+            auto GLFWWindowWrapped::ProcessEvents() -> void {
                 glfwPollEvents();
             }
-            bool GLFWWindowWrapped::should_close() {
+            auto GLFWWindowWrapped::should_close() -> bool {
                 return glfwWindowShouldClose(this->m_window);
             }
 
-            void GLFWWindowWrapped::setBgBlur(bool blur)
-            {
+            auto GLFWWindowWrapped::setBgBlur(bool blur) -> void {
                 if (blur) {
                     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_TRUE);
                 }
                 else {
                     glfwWindowHint(GLFW_TRANSPARENT_FRAMEBUFFER, GLFW_FALSE);
                 }
+            }
+            auto GLFWWindowWrapped::getAPIName() -> string{
+                return "GLFW";
+            }
+            auto GLFWWindowWrapped::get_handle()-> GLFWwindow*{
+                return this->m_window;
             }
         } // GLFW
     } // Window

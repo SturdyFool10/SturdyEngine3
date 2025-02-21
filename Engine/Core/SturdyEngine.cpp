@@ -35,6 +35,7 @@ namespace SFT {
         this->window->setBgBlur(true);
 
         this->renderer = new Renderer::VK::VulkanRenderer();
+        this->renderer->SetWindow(this->window);
         if (result = this->renderer->Initialize(); !result.has_value()) {
             throw std::runtime_error("Failed to initialize renderer: " + result.error());
         }

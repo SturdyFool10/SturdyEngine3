@@ -6,6 +6,8 @@
 
 #include <string.h>
 
+#include "Core/Window/GLFW/GLFWWindowWrapped.h"
+
 const std::vector validationLayers = {
         "VK_LAYER_KHRONOS_validation"
     };
@@ -324,6 +326,21 @@ namespace SFT::Renderer::VK {
         return {};
     }
 
+    //Surface lesson
+
+    auto VulkanRenderer::createSurface() -> expected<void, string> {
+        auto APIName = this->m_window->getAPIName();
+        if (APIName == "GLFW") {
+            const auto window = dynamic_cast<Window::GLFW::GLFWWindowWrapped*>(this->m_window);
+            if (glfwCreateWindowSurface(this->m_instance, window->get_handle(), nullptr, &this->m_surface) != VK_SUCCESS) {
+                return unexpected("failed to create window surface!");
+            }
+            return {};
+        } else {
+            return unexpected("Window API not supported");
+        }
+    }
+
     VulkanRenderer::VulkanRenderer() {
 
     }
@@ -339,6 +356,9 @@ namespace SFT::Renderer::VK {
         }
         if (result = this->setupDebugMessenger(); !result.has_value()) {
             return unexpected("Failed to set up debug messenger: " + result.error());
+        }
+        if (result = this->createSurface(); !result.has_value()) {
+            return unexpected("Failed to create surface: " + result.error());
         }
         if (result = this->pickPhysicalDevice(); !result.has_value()) {
             return unexpected("Failed to pick physical device: " + result.error());
@@ -364,6 +384,7 @@ namespace SFT::Renderer::VK {
         if (enableValidationLayers) {
             DestroyDebugUtilsMessengerEXT(this->m_instance, this->m_debugMessenger, nullptr);
         }
+        vkDestroySurfaceKHR(this->m_instance, this->m_surface, nullptr);
         vkDestroyInstance(this->m_instance, nullptr);
     }
 
@@ -373,6 +394,9 @@ namespace SFT::Renderer::VK {
 
     auto VulkanRenderer::Resize(int width, int height) -> expected<void, string> {
         return {};
+    }
+    auto VulkanRenderer::SetWindow(Window::Window* window)-> void {
+        this->m_window = window;
     }
 
     VKAPI_ATTR auto VKAPI_CALL VulkanRenderer::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData) -> VkBool32 {

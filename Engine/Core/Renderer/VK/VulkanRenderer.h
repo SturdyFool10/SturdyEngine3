@@ -40,6 +40,8 @@ namespace SFT::Renderer::VK {
             VkPhysicalDevice m_physicalDevice = VK_NULL_HANDLE;
             VkDevice m_logicalDevice;
             VkQueue m_graphicsQueue;
+            VkSurfaceKHR m_surface;
+            Window::Window* m_window;
 #pragma endregion
 
 
@@ -47,10 +49,12 @@ namespace SFT::Renderer::VK {
 #pragma region Internal Functions
             auto create_instance()-> expected<void, string>;
             static auto checkValidationLayerSupport() -> bool;
-            auto setupDebugMessenger() -> expected<void, string>;auto is_device_compatible(VkPhysicalDevice device)->bool;
+            auto setupDebugMessenger() -> expected<void, string>;
+            auto is_device_compatible(VkPhysicalDevice device)->bool;
             auto pickPhysicalDevice() -> expected<void, string>;
-            auto findQueueFamilies(VkPhysicalDevice device)->QueueFamilyIndices;
-            auto createLogicalDevice()->expected<void, string>;
+            auto findQueueFamilies(VkPhysicalDevice device) -> QueueFamilyIndices;
+            auto createLogicalDevice() -> expected<void, string>;
+            auto createSurface() -> expected<void, string>;
             auto getRequiredExtensions() -> vector<const char*>;
 #pragma endregion
 
@@ -58,9 +62,10 @@ namespace SFT::Renderer::VK {
             VulkanRenderer();
             ~VulkanRenderer() override;
             auto Initialize() -> expected<void, string> override;
-            void Shutdown() override;
+            auto Shutdown()-> void override;
             auto RenderFrame() -> expected<void, string> override;
             auto Resize(int width, int height) -> expected<void, string> override;
+            auto SetWindow(Window::Window* window) -> void override;
             static auto debugCallback(
                 VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
                 VkDebugUtilsMessageTypeFlagsEXT messageType,

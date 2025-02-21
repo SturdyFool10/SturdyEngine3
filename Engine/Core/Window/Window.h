@@ -16,12 +16,14 @@ namespace SFT::Window {
         public:
             virtual ~Window() {};
 
-            virtual expected<void, string> Create(int width, int height, const string& title) = 0;
-            virtual void Destroy() = 0;
-            virtual void* GetNativeWindowHandle() = 0;
-            virtual void ProcessEvents() = 0;
-            virtual bool should_close() = 0;
-            virtual void setBgBlur(bool blur) = 0;
+            virtual auto Create(int width, int height, const string& title) -> expected<void, string> = 0;
+            virtual auto Destroy() -> void = 0;
+            virtual auto GetNativeWindowHandle() -> void*  = 0;
+            virtual auto ProcessEvents() -> void = 0;
+            virtual auto should_close() -> bool = 0;
+            virtual auto setBgBlur(bool blur) -> void = 0;
+            virtual auto getAPIName() -> string = 0;
+
     };
 } // Window
 

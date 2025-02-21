@@ -6,8 +6,12 @@
 #define RENDERER_H
 #include <complex>
 #include <expected>
+#include "Core/Window/Window.h"
 
-typedef std::expected<bool, std::string> (*UpdateCallback)(double deltaTime);
+using std::expected;
+using std::string;
+
+typedef expected<bool, string> (*UpdateCallback)(double deltaTime);
 
 namespace SFT::Renderer {
     class Renderer {
@@ -15,10 +19,11 @@ namespace SFT::Renderer {
             UpdateCallback m_updateCallback;
         public:
             virtual ~Renderer() {};
-            virtual std::expected<void, std::string> Initialize() = 0;
+            virtual expected<void, string> Initialize() = 0;
             virtual void Shutdown() = 0;
-            virtual std::expected<void, std::string> RenderFrame() = 0;
-            virtual std::expected<void, std::string> Resize(int width, int height) = 0;
+            virtual expected<void, string> RenderFrame() = 0;
+            virtual expected<void, string> Resize(int width, int height) = 0;
+            virtual void SetWindow(Window::Window* window) = 0;
     };
 } // Renderer
 
