@@ -49,6 +49,7 @@ namespace SFT::Renderer::VK {
             vector<VkImage> m_swapChainImages;
             VkFormat swapChainImageFormat;
             VkExtent2D swapChainExtent;
+            vector<VkImageView> m_swapChainImageViews;
 #pragma endregion
 
 
@@ -67,7 +68,7 @@ namespace SFT::Renderer::VK {
             auto chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>&availableFormats) -> VkSurfaceFormatKHR;
             auto chooseSwapPresentMode(const std::vector<VkPresentModeKHR>&availablePresentModes) -> VkPresentModeKHR;
             auto chooseSwapExtent(const VkSurfaceCapabilitiesKHR&capabilities) -> VkExtent2D;
-            auto createSwapChain() -> expected<void, string>;
+            auto createSwapChain() -> expected<void, string>;auto createSwapchainImageViews()->expected<void, string>;
             auto getRequiredExtensions() -> vector<const char*>;
 #pragma endregion
 

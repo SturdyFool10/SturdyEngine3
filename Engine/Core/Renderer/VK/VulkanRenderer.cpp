@@ -505,6 +505,36 @@ namespace SFT::Renderer::VK {
         return {};
     }
 
+    //ImageViews lesson
+
+    auto VulkanRenderer::createSwapchainImageViews() -> expected<void, string> {
+        this->m_swapChainImageViews.resize(this->m_swapChainImages.size());
+        for (size_t i = 0; i < this->m_swapChainImages.size(); i++) {
+            VkImageViewCreateInfo createInfo{};
+            createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+            createInfo.image = this->m_swapChainImages[i];
+
+            createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+            createInfo.format = swapChainImageFormat;
+
+            createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+            createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+
+            createInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            createInfo.subresourceRange.baseMipLevel = 0;
+            createInfo.subresourceRange.levelCount = 1;
+            createInfo.subresourceRange.baseArrayLayer = 0;
+            createInfo.subresourceRange.layerCount = 1;
+
+            if (vkCreateImageView(this->m_logicalDevice, &createInfo, nullptr, &this->m_swapChainImageViews[i]) != VK_SUCCESS) {
+                return unexpected("failed to create image views!");
+            }
+        }
+        return {};
+    }
+
     VulkanRenderer::VulkanRenderer() {
 
     }
@@ -533,6 +563,9 @@ namespace SFT::Renderer::VK {
         if (result = this->createSwapChain(); !result.has_value()) {
             return unexpected("Failed to create swap chain: " + result.error());
         }
+        if (result = this->createSwapchainImageViews(); !result.has_value()) {
+            return unexpected("Failed to create swap chain image views: " + result.error());
+        }
         return {};
     }
 
@@ -547,6 +580,9 @@ namespace SFT::Renderer::VK {
     }
 
     void VulkanRenderer::Shutdown() {
+        for (auto imageView : this->m_swapChainImageViews) {
+            vkDestroyImageView(this->m_logicalDevice, imageView, nullptr);
+        }
         vkDestroySwapchainKHR(this->m_logicalDevice, this->m_swapChain, nullptr);
         vkDestroyDevice(this->m_logicalDevice, nullptr);
         if (enableValidationLayers) {
@@ -563,6 +599,7 @@ namespace SFT::Renderer::VK {
     auto VulkanRenderer::Resize(int width, int height) -> expected<void, string> {
         return {};
     }
+
     auto VulkanRenderer::SetWindow(Window::Window* window) -> void {
         this->m_window = window;
     }

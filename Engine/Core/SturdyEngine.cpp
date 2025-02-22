@@ -28,9 +28,9 @@ namespace SFT {
     void SturdyEngine::run() {
         glfwInit();
         #ifdef NDEBUG
-            spdlog::set_level(spdlog::level::info);
-        #else
             spdlog::set_level(spdlog::level::trace);
+        #else
+            spdlog::set_level(spdlog::level::debug);
         #endif
         spdlog::set_pattern("%^[%l]%$: %v");
         this->window = new Window::GLFW::GLFWWindowWrapped();
