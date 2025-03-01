@@ -19,11 +19,12 @@ namespace SFT::Renderer {
             UpdateCallback m_updateCallback;
         public:
             virtual ~Renderer() {};
-            virtual expected<void, string> Initialize() = 0;
-            virtual void Shutdown() = 0;
-            virtual expected<void, string> RenderFrame() = 0;
-            virtual expected<void, string> Resize(int width, int height) = 0;
-            virtual void SetWindow(Window::Window* window) = 0;
+            virtual auto Initialize() -> expected<void, string> = 0;
+            virtual auto Shutdown() -> void = 0;
+            virtual auto RenderFrame() -> expected<void, string> = 0;
+            virtual auto Resize(int width, int height) -> expected<void, string> = 0;
+            virtual auto SetWindow(Window::Window* window) -> void = 0;
+            virtual auto getAPIName() -> string = 0;
     };
 } // Renderer
 

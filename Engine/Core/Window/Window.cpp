@@ -4,7 +4,4 @@
 
 #include "Window.h"
 
-
-namespace SFT::Window {
-
-} // Window
+namespace SFT::Window {} // namespace SFT::Window
