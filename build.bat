@@ -7,6 +7,9 @@ if exist compile_commands.json del /f /q compile_commands.json
 
 echo Generating project build with compile_commands.json...
 mkdir build
+echo Running vcpkg install to get all project dependancies...
+vcpkg install --triplet=x64-windows-static
+
 cd build
 cmake -G Ninja -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
 if exist compile_commands.json copy /Y compile_commands.json ..
