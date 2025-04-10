@@ -13,3 +13,5 @@
 /build
 /build_vs2022
 /build_make
+/.cache/
+/compile_commands.json

@@ -1,3 +1,5 @@
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "") # works
+
 cmake_minimum_required(VERSION 3.30)
 project(SturdyEngine3 LANGUAGES CXX)
 
@@ -17,6 +19,7 @@ endif()
 add_compile_definitions(FMT_HEADER_ONLY)
 
 set(CMAKE_CXX_STANDARD 26)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /utf-8")
 # Application Specific Deps go here, this allows for easy linking of libraries, the Core and its deps are automatically linked, but you sure can add more here!
 
 set(Runtime_INCLUDE_DIRS
